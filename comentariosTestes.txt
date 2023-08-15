@@ -1,0 +1,34 @@
+teste1 - ACEITA
+AUG - códon de ínicio
+GUUVal - par correto
+CGAArg - par correto
+UAUTyr - par correto
+ACUThr - par correto
+GUAVal - par correto
+GGGGly - par correto
+CUULeu - par correto
+AAALys - par correto
+CCCPro - par correto
+UAA - códon de parada
+
+teste2 - ACEITA
+AUG - códon de início
+AGUSer - par correto
+AGAArg - par correto
+UGA - códon de parada
+
+teste3 - REJEITA
+AUG - códon de início
+GAGGlu - par correto
+CAUHis - par correto
+AAASer - par incorreto, aminoácido de AAA é Lys
+UGA - códon de parada
+
+teste4 - REJEITA
+AUG - códon de início
+ACUThr - par correto
+AAGLys - par correto
+UUUPhe - par correto
+UUGLeu - par correto
+CCAPro - par correto
+Não há códon de parada
