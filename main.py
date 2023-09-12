@@ -12,48 +12,50 @@ class Automato:
         if q0 in fim:
             self.ACEITA[0] = True
 
-        self.NAO_FINAL = [not(self.ACEITA), 'REJEITA! Atingiu estado não final']
-        self.INDEFINIDO = [False, 'REJEITA! Transição indefinida']
-        self.ALFABETO = [False, 'REJEITA! Símbolo não contido no alfabeto']
+        # Casos onde a entrada é rejeitada
+        self.NAO_FINAL = [not(self.ACEITA), 'REJEITA! Atingiu estado não final! O códon de parada não foi lido']
+        self.INDEFINIDO = [False, lambda s, c: f'REJEITA! O aminoácido {s} não é codificado pelo códon {c}']
+        self.ALFABETO = [False, lambda s: f'REJEITA! O símbolo {s} não está contido no alfabeto']
         self.ERRADO = False
-
-    def reset(self):
-        self.atual = self.q0
-
-    def step(self, simbolo):
-        if simbolo not in alfabeto:
+        
+    # A função avalia o símbolo fornecido pelos usuário e, caso eles sejam válidos, muda para a próximo estado
+    # argumentos sigla e codon são utilizados quando é lido um aminoácido, nesse caso sigla=True e codon=códon que o codifica
+    def step(self, simbolo, sigla = False, codon = None):
+        if simbolo not in alfabeto: # Se o símbolo lido não está no alfabeto, informa ao usuário sobre esse erro e encerra a leitura da entrada
             self.ALFABETO[0] = True
-            print(self.ALFABETO[1])
+            print(self.ALFABETO[1](simbolo))
             self.ERRADO = True
             return
-        
-        if self.atual in self.fim:
-            self.ACEITA[0] = True
-            return
 
+        #proxEstado = None significa transição indefinida
         try:
-            proxEstado = self.transicoes[(self.atual, simbolo)]
+            proxEstado = self.transicoes[(self.atual, simbolo)] 
         except KeyError:
             proxEstado = None
 
+        # Caso o próximo estado não exista, informa ao usuário e encerra a leitura da entrada
         if proxEstado is None:
             self.INDEFINIDO[0] = True
-            print(self.INDEFINIDO[1])
+            if sigla: print(self.INDEFINIDO[1](simbolo, codon))
+            else: print('REJEITA! Transição indefinida')
             self.ERRADO = True
             return
 
+        # Se o próximo estado não é de fim, continua a leitura
         if proxEstado not in self.fim:
             self.NAO_FINAL[0] = True
 
+        # Se o próximo estado é de fim, a entrada é aceita    
+        if proxEstado in self.fim:
+            self.ACEITA[0] = True
+            return
+        
+        if sigla:
+            print(f'Códon {codon} e aminoácido {simbolo}: OK')
         self.atual = proxEstado
-
-        # if self.ACEITA[0]:
-        #     print(self.ACEITA[1])
-        # else:
-        #     print(self.NAO_FINAL[1])
         
 
-
+# Configurações do autômoto do sistema
 estados = ['q0', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10', 'q11', 'q12', 'q13', 'q14', 'q15', 'q16', 'q17', 'q18', 'q19', 'q20', 'q21', 'q22', 'q23', 'q24', 'q25', 'q26', 'q27', 'q28', 'q29', 'q30', 'q31', 'q32', 'q33', 'q34', 'q35', 'q36', 'q37', 'q38', 'q39', 'q40', 'q41', 'q42', 'q43', 'q44', 'q45', 'q46', 'q47']
 alfabeto = ['U', 'C', 'A', 'G', 'Phe', 'Leu', 'Ser', 'Tyr', 'Cys', 'Trp', 'Pro', 'His', 'Gln', 'Arg', 'Ile', 'Thr', 'Asn', 'Lys', 'Val', 'Ala', 'Asp', 'Glu', 'Gly']
 estadoInicial = 'q0'
@@ -169,23 +171,109 @@ transicoes = {
     ('q47', 'Gly') : 'q3',
 
 }
+print("\n")
+print("                     SIMULAÇÃO DO PROCESSO DE TRADUÇÃO DO RNA\n")
 
-afd = Automato(estados, alfabeto, estadoInicial, estadosFinais, transicoes)
-teste = 'AUGGUUValCGAArgUAUTyrACUThrGUAValGGGGlyCUULeuAAALysCCCProUAA'
 
-for s in teste:
-    afd.step(s)
-    if afd.ERRADO:
+while True: 
+
+    modo = int(input("\nDigite\n (1) para leitura pelo terminal\n (2) para leitura de arquivo\n (3) para encerrar o programa\n"))
+    codon = ''
+    # Modo 1 (leitura pelo terminal)
+    if modo == 1:
+        aviso = 'Para que a entrada seja aceita, siga as instruções abaixo: \n \
+                1 - Digite o códon de início; \n \
+                2 - Na linha seguinte, escreva um códon; \n \
+                3 - Na próxima linha, o aminoácido correspondente; \n \
+                4 - Repita os passos 2 e 3 quantas vezes forem necessárias; \n \
+                5 - Digite um códon de parada.\n'
+        print(aviso)
+        print("Para encerrar a leitura pule uma linha (tecle duas vezes seguidas no Enter)")
+
+        afd = Automato(estados, alfabeto, estadoInicial, estadosFinais, transicoes) # Inicializa o autômato
+        while True:
+            # Recebe um códon ou uma sigla em cada linha do terminal
+            entrada = input()
+
+            if not entrada: # Caso a entrada seja vazia, termina a leitura
+                break
+
+            if entrada not in alfabeto: # Caso a entrada seja um códon, avalia se cada letra(base) está no alfabeto
+                for i in entrada:   
+                    afd.step(i)
+                    if afd.ERRADO: # Se houve um erro na leitura do códon, acaba esse processo
+                        break
+                if not(afd.ERRADO):
+                    codon = entrada
+                    if codon == 'AUG': print('Códon de ínicio: OK')
+                    elif codon in ['UAA', 'UAG', 'UGA']: print(f'Códon de fim {codon}: OK')
+                    else: print(f'Códon {codon}: OK')
+            else: # Caso seja uma sigla, avalia se corresponde ao códon recebido na linha anterior
+                afd.step(entrada, True, codon)
+
+            if afd.ERRADO or afd.ACEITA[0]: # Se houve um erro na leitura da entrada ou a entrada é aceita, acaba esse processo
+                break 
+                
+        if not afd.ACEITA[0] and not afd.ERRADO: # Se a leitura terminou e ela não foi aceita e não apresentou erros, o último estado não é final
+            print(afd.NAO_FINAL[1])
+
+        elif afd.ACEITA[0]: # Se a leitura chegou ao fim, não teve erros e está num estado final, a entrada é aceita
+            print(afd.ACEITA[1])
+        codon = ''
+
+            
+
+    # Modo 2 (leitura de arquivo)
+    elif modo == 2:
+        nome_arquivo = input("Digite o caminho do arquivo: ")
+
+        try:
+            # Abre o arquivo informado pelo usuário e faz sua leitura
+            with open(nome_arquivo, 'r') as arquivo:
+                entrada = arquivo.read()
+                entrada = entrada.replace(',', '')
+    
+                afd = Automato(estados, alfabeto, estadoInicial, estadosFinais, transicoes) # Inicializa o autômato
+
+                trios = [entrada[i:i+3] for i in range(0, len(entrada), 3)] # Cria uma lista onde cada elemento é formado por 3 caracteres da entrada
+
+                # Percorre a lista dos grupos de 3 caracteres
+                for s in trios: 
+                    if s in alfabeto: # Caso esses 3 caracteres juntos estejam dentro do alfabeto, esse grupo representa um sigla
+                        afd.step(s, True, codon)
+                    else: # Caso contrário, é um códon
+                        # Como a entrada é um códon, avalia cada letra(base)
+                        codon = ''
+                        for i in s:
+                            afd.step(i)
+                            codon += i
+                        if not(afd.ERRADO):
+                            if codon == 'AUG': print('Códon de ínicio: OK')
+                            elif codon in ['UAA', 'UAG', 'UGA']: print(f'Códon de fim {codon}: OK')
+                            else: print(f'Códon {codon}: OK')
+
+                    if afd.ERRADO or afd.ACEITA[0]: # Se houve um erro na leitura da entrada ou a entrada é aceita, acaba esse processo
+                        break
+
+                if not afd.ACEITA[0] and not afd.ERRADO: # Se a leitura terminou e ela não foi aceita e não apresentou erros, o último estado não é final
+                    print(afd.NAO_FINAL[1])
+
+                elif afd.ACEITA[0]: # Se a leitura chegou ao fim, não teve erros e está num estado final, a entrada é aceita
+                    print(afd.ACEITA[1])
+
+            arquivo.close()
+
+        # Casos de erro na abertura e leitura do arquivo         
+        except FileNotFoundError:
+                print(f"O arquivo '{nome_arquivo}' não foi encontrado.")
+        except Exception as e:
+                print(f"Ocorreu um erro ao tentar ler o arquivo: {e}")
+        codon = ''
+
+
+    # modo 3 (encerra o programa)
+    elif modo == 3:
         break
-if not afd.ERRADO:
-    print(afd.ACEITA[1])
 
-# elif afd.NAO_FINAL[0]:
-#     print(afd.NAO_FINAL[1])
 
-# ACEITA = atingiu estado final
-# REJEITA - última letra parou em um estado não final
-# REJEITA - transição não definida
-# REJEITA - não está no alfabeto
-
-# rejeitar palaavra vazia
+   
