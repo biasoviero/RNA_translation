@@ -2,6 +2,20 @@
 
 Project made by [Beatriz Soviero](https://github.com/biasoviero) and [Lais Canabarro](https://github.com/laiscanabarro)
 
+## Table of Contents
+
+- [Description of the RNA Translation Process](#description-of-the-rna-translation-process)
+  - [What is RNA?](#what-is-rna)
+  - [Protein Synthesis](#protein-synthesis)
+- [Deterministic Finite Automaton](#deterministic-finite-automaton)
+  - [Alphabet](#alphabet)
+  - [States](#states)
+- [Automaton Implemented with Python](#automaton-implemented-with-python)
+  - [Building the Automaton](#building-the-automaton)
+  - [Running the Automaton](#running-the-automaton)
+- [How to Use the Program](#how-to-use-our-program)
+
+
 ## Description of the RNA translation process
 
 ### What is RNA?
@@ -124,5 +138,8 @@ There are two ways for reading the RNA chain:
      3. In the next line, the amino acid encoded by step 2 and press ENTER;
      4. Repeat steps 2 and 3  as many times as necessary;
      5. Type the stop codon.
+<img src="https://github.com/biasoviero/Trabalho-RNA/blob/main/terminalReading.gif" width="600" height="600"/>
         
 * File reading (2): to read a chain written in a file, .csv and .txt formats are supported. You only need to type the file´s path.
+
+<img src="https://github.com/biasoviero/Trabalho-RNA/blob/main/fileReading.gif" width="600" height="600"/>
