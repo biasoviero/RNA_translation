@@ -58,7 +58,7 @@ The class Automato is initialized with the parameters:
  * estados (array of strings that represent states);
  * alfabeto (array of strings that represent accepted symbols);
  * q0 (string with the initial state);
- * fim (string with final state);
+ * fim (array of strings that represent final states);
  * transicoes (dictionary in the format {('state', 'symbol') : 'next state'}).
 
 ```
